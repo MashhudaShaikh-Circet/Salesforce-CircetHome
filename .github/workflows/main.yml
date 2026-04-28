@@ -1,4 +1,4 @@
-name: Salesforce CI (Stub Mode)
+name: Salesforce CI (Safe Mode - No Deploy)
 
 on:
   push:
@@ -6,19 +6,27 @@ on:
       - develop
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Validate repository structure
+      - name: Show repository structure
         run: |
           echo "Checking Salesforce project structure..."
-          ls -R force-app || echo "No Salesforce metadata yet"
+          ls -R force-app || echo "No force-app folder found"
 
-      - name: Simulate deployment
+      - name: Validate metadata presence
         run: |
-          echo "Salesforce deployment will run here later"
-          echo "Pipeline is ready for activation once auth is added"
+          if [ -d "force-app" ]; then
+            echo "✔ Salesforce structure exists"
+          else
+            echo "⚠ Missing Salesforce structure"
+          fi
+
+      - name: Simulate deployment step
+        run: |
+          echo "Deployment skipped (Salesforce disconnected)"
+          echo "Pipeline is running in SAFE MODE"
