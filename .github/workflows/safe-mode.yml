@@ -1,0 +1,32 @@
+name: Salesforce CI (Safe Mode - No Deploy)
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Show repository structure
+        run: |
+          echo "Checking Salesforce project structure..."
+          ls -R force-app || echo "No force-app folder found"
+
+      - name: Validate metadata presence
+        run: |
+          if [ -d "force-app" ]; then
+            echo "✔ Salesforce structure exists"
+          else
+            echo "⚠ Missing Salesforce structure"
+          fi
+
+      - name: Simulate deployment step
+        run: |
+          echo "Deployment skipped (Salesforce disconnected)"
+          echo "Pipeline is running in SAFE MODE"
