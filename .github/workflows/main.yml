@@ -4,21 +4,32 @@ on:
   push:
     branches:
       - develop
-
+  pull_request:
+    branches:
+      - develop
+      
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Validate repository structure
+      - name: Validate structure
         run: |
           echo "Checking Salesforce project structure..."
-          ls -R force-app || echo "No Salesforce metadata yet"
+          ls -R force-app || exit 1
 
-      - name: Simulate deployment
+      - name: Check for required metadata folder
         run: |
-          echo "Salesforce deployment will run here later"
-          echo "Pipeline is ready for activation once auth is added"
+          if [ ! -d "force-app" ]; then
+            echo "Missing Salesforce metadata"
+            exit 1
+          fi
+
+      - name: Simulate quality checks
+        run: |
+          echo "Running code quality checks..."
+          echo "✔ No syntax validation errors (simulated)"
+          echo "✔ Structure valid"
