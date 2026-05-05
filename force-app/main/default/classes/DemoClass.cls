@@ -1,5 +1,5 @@
 public class DemoClass {
     public static void run() {
-        System.debug('Repo structure working');
+        System.debug('Testing deployment flow');
     }
 }
