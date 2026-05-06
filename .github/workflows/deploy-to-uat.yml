@@ -1,0 +1,41 @@
+name: Deploy to UAT
+
+on:
+  push:
+    branches:
+      - uat  # Triggers when code is merged into the uat branch
+
+jobs:
+  deployment-job:
+    runs-on: ubuntu-latest
+    # Uses the official Salesforce image with the CLI pre-installed
+    container:
+      image: salesforce/cli:latest-full
+
+    steps:
+      # 1. Pull the source code from GitHub
+      - name: 'Checkout source code'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. Log in to Salesforce using your secret key
+      - name: 'Authenticate to Salesforce'
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL_UAT }}" > ./auth_url.txt
+          sf org login auth sfdx-url --sfdx-url-file ./auth_url.txt --set-default --alias uat_org
+          rm ./auth_url.txt
+
+      # 3. Validate and Run Tests
+      # This performs a 'check-only' deployment. It will fail if tests fail.
+      - name: 'Validate and Run Apex Tests'
+        run: |
+          sf project deploy validate \
+            --target-org uat_org \
+            --test-level RunLocalTests \
+            --wait 30
+
+      # 4. Quick Deploy
+      # If the step above passes, this actually saves the changes in Salesforce.
+      - name: 'Execute Quick Deployment'
+        run: sf project deploy quick --target-org uat_org
